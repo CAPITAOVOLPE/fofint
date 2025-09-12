@@ -1,40 +1,81 @@
-// Array com as imagens (1.png até 7.png)
+// --- Configuração da galeria de imagens ---
 const imagens = [];
-for (let i = 1; i <= 7; i++) {
-  imagens.push(`${i}.png`);
-}
+for (let i = 1; i <= 7; i++) imagens.push(`${i}.png`);
 
 let index = 0;
 const imageElement = document.getElementById("image");
 const nextBtn = document.getElementById("nextBtn");
+const contentDiv = document.getElementById("content");
 const music = document.getElementById("music");
 
-let musicStarted = false;      // Para iniciar música apenas uma vez
-let isTransitioning = false;   // Para bloquear cliques durante a transição
+let isTransitioning = false;
 
+// Próxima imagem / última imagem leva para emojis
 nextBtn.addEventListener("click", () => {
-  // Inicia música no primeiro clique
-  if (!musicStarted) {
-    music.play().catch(() => console.log("Erro ao iniciar música"));
-    musicStarted = true;
-  }
-
-  // Bloqueia cliques durante a transição
   if (isTransitioning) return;
   isTransitioning = true;
 
-  // Se estiver na última imagem, redireciona
   if (index === imagens.length - 1) {
-    window.location.href = "parte.html";
+    showEmojiGame();
     return;
   }
 
-  // Transição suave
   imageElement.style.opacity = 0;
   setTimeout(() => {
     index++;
     imageElement.src = imagens[index];
     imageElement.style.opacity = 1;
-    isTransitioning = false; // libera o clique
-  }, 300); // duração da transição (300ms)
+    isTransitioning = false;
+  }, 300);
 });
+
+// --- Função para mostrar o jogo dos emojis ---
+function showEmojiGame() {
+  contentDiv.innerHTML = `
+    <h1>🔒 Complete a senha com os emojis e cores certas 🔒</h1>
+    <div class="emoji-container">
+      ${createEmojiBox("☠","Laranja")}
+      ${createEmojiBox("😎","Cinza")}
+      ${createEmojiBox("🦊","Ciano")}
+      ${createEmojiBox("🙃","Vinho")}
+      ${createEmojiBox("👻","Preto")}
+      ${createEmojiBox("🤡","Azul")}
+    </div>
+    <div id="message" class="message">
+      ✨💛 <strong>Oi, meu amor!</strong> 💛✨<br>
+      Quero que você saiba que você é <strong>extremamente importante para mim</strong>.<br>
+      Cada detalhe que fiz aqui foi com <strong>muito cuidado e carinho</strong>, pensando em você.<br>
+      Eu te amo <strong>mil, milhões de vezes</strong>! 💖<br>
+      E aqui vai a sua <strong>senha especial</strong>: <code>beijinhomomoh</code> 💌
+    </div>
+  `;
+
+  const selects = document.querySelectorAll(".color-select");
+  const message = document.getElementById("message");
+
+  selects.forEach(select => {
+    select.addEventListener("change", () => {
+      let allCorrect = true;
+      selects.forEach(s => {
+        if (s.value !== s.dataset.correct) allCorrect = false;
+      });
+      message.style.display = allCorrect ? "block" : "none";
+    });
+  });
+  isTransitioning = false;
+}
+
+// --- Função auxiliar para criar cada emoji com dropdown ---
+function createEmojiBox(emoji, correctColor) {
+  const colors = ["Preto","Cinza","Azul","Vinho","Ciano","Laranja"];
+  const options = colors.map(c => `<option value="${c}">${c}</option>`).join("");
+  return `
+    <div class="emoji-box">
+      <span class="emoji">${emoji}</span>
+      <select class="color-select" data-correct="${correctColor}">
+        <option value="">Escolha a cor</option>
+        ${options}
+      </select>
+    </div>
+  `;
+}
